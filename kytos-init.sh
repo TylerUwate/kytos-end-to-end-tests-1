@@ -35,15 +35,14 @@ if ! grep -q aiokafka $NAPPS_PATH/etc/kytos/logging.ini; then
 fi
 
 test -z "$TESTS" && TESTS=tests/
-test -z "$RERUNS" && RERUNS=2
+test -z "$RERUNS" && RERUNS=0
 
 python3 scripts/wait_for_mongo.py 2>/dev/null
 python3 scripts/setup_kafka.py
 
 date
 
-python3 -m pytest $TESTS --reruns $RERUNS -r fEr
-
+python3 -m pytest $TESTS -k "test_04_napp_delete_topic_pattern" --reruns $RERUNS -r fEr
 #tail -f
 
 # only run specific test

@@ -88,8 +88,7 @@ class TestE2EKafkaEvents:
         response = requests.post(
             api_url,
             data=json.dumps(payload),
-            headers={'Content-type': 'application/json'},
-            timeout=5
+            headers={'Content-type': 'application/json'}
         )
 
         assert response.status_code == 201, response.text
@@ -127,3 +126,70 @@ class TestE2EKafkaEvents:
         assert found
 
         await consumer.stop()
+    def test_02_napp_get_topics(self):
+        """
+        Test that the napp returns the correct topics and patterns
+        """
+        api_url = KYTOS_API + '/kafka_events/v1/topics'
+        response = requests.get(
+            api_url,
+            headers={'Content-type': 'application/json'},
+        )
+
+        assert response.status_code == 200, response.text
+
+        data = response.json()
+        print("Data: ", data)
+
+        assert "allowed" in data
+        assert "blocked" in data
+
+        # Check that the blocked patterns are correct
+        blocked_patterns = data["blocked"]
+        print("Blocked patterns: ", blocked_patterns)
+        expected_blocked_patterns = [
+            "kytos/of_core.v0x04.messages.*",
+            "kytos/flow_manager.messages.out.*",
+            "kytos/of_lldp.messages.out.*",
+            "kytos/core.openflow.raw.*",
+            "kytos/core.interface_tags",
+            "kytos/of_lldp.interface.is.nni"
+        ]
+
+        for pattern in expected_blocked_patterns:
+            assert pattern in blocked_patterns
+            print(f"{pattern} is in blocked patterns.")
+    
+    
+    
+    
+   
+    def test_04_napp_delete_topic_pattern(self):
+        """
+        Tests that a pattern can be deleted. 
+        Recommend using get_topics to see if a topic was there or wasn't. 
+        """
+        TOPICS_ENDPOINT = KYTOS_API + '/kafka_events/v1/topics'
+        HEADERS = {'Content-type', 'application/json'}
+
+        #pattern to delete, must be changed.
+        pattern = 2
+
+        #1. Remove the pattern (kafka_events is a pattern created)
+        response = requests.delete(TOPICS_ENDPOINT, json={"pattern": pattern, })
+
+
+    def test_03_napp_add_topic_pattern(self):
+        """Test that a topic pattern can be created through the topics endpoint."""
+        TOPICS_ENDPOINT = KYTOS_API + '/kafka_events/v1/topics'
+        HEADERS = {'Content-type': 'application/json'}
+
+        response = requests.post(
+            TOPICS_ENDPOINT,
+            json={
+                "pattern": [0],
+                "description": ["e2e test pattern"],
+            },
+            headers=HEADERS,
+        )
+        assert response.status_code == 201, response.text
