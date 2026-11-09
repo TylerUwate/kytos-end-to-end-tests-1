@@ -722,12 +722,6 @@ class TestE2ETelemetryINTApi(INTHelper):
 
         self.assert_no_int_flows(self.switches, evc_id)
 
-    @pytest.mark.xfail(
-        reason="kytos-ng/telemetry_int#187: returns 500: ProxyPortRequired is "
-        "a ProxyPortConflict, which expected_flows and check_consistency "
-        "don't map, so it falls into their UnrecoverableError branch",
-        strict=True,
-    )
     def test_305_intra_switch_expected_flows_and_consistency_require_proxy_port(
         self,
     ):
